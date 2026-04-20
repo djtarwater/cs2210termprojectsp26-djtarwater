@@ -36,7 +36,12 @@ public class TwoFourTree
     }
 
     private int FFGTE(TFNode node, int key){
-        return 0;
+        for (int i = 0; i < node.getNumItems(); i++){
+            if (treeComp.isGreaterThan(node.getItem(i), key)){
+                return i;
+            }
+        }
+        return node.getNumItems();
     }
 
     //What child is this function
