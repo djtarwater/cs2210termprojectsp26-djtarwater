@@ -70,15 +70,15 @@ public class TwoFourTree
         int index = FFGTE(treeRoot, key);
 	    TFNode current = treeRoot;
 
-	    /*while(index == current.numItems || current.getItem(index) != key) {
-		    new node child = current.getChild(index);
+	    while(index == current.getNumItems() || current.getItem(index) != key) {
+		    TFNode child = current.getChild(index);
 		    if (child == null) {
 			    break;
 		    } else {
 			    current = child;
-			    index = current.FFGTE();
+			    index = FFGTE(current, key);
 		    }	
-	}*/
+	    }
 
         return null;
     }
