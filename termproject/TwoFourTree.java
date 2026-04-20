@@ -35,6 +35,17 @@ public class TwoFourTree
         return (size == 0);
     }
 
+    private int FFGTE(TFNode node, int key){
+        return 0;
+    }
+
+    //What child is this function
+    private int WCIS(TFNode node){
+        return 0;
+    }
+
+
+
     /**
      * Searches dictionary to determine if key is present
      * @param key to be searched for
