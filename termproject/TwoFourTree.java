@@ -37,15 +37,21 @@ public class TwoFourTree
 
     private int FFGTE(TFNode node, int key){
         for (int i = 0; i < node.getNumItems(); i++){
-            if (treeComp.isGreaterThan(node.getItem(i), key)){
+            if (treeComp.isGreaterThan(node.getItem(i), key)) {
                 return i;
             }
-        }//
+        }
         return node.getNumItems();
     }
 
     //What child is this function
-    private int WCIS(TFNode node){
+    private int WCIT(TFNode node) {
+        /*TFNode parent = node.getParent();
+        if (parent == null) {
+            return -1;
+        }
+        else 
+        */
         return 0;
     }
 
