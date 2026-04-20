@@ -35,7 +35,7 @@ public class TwoFourTree
         return (size == 0);
     }
 
-    private int FFGTE(TFNode node, int key){
+    private int FFGTE(TFNode node, Object key){
         for (int i = 0; i < node.getNumItems(); i++){
             if (treeComp.isGreaterThan(node.getItem(i), key)) {
                 return i;
@@ -67,6 +67,19 @@ public class TwoFourTree
      */
     public Object findElement(Object key) {
         //TODO: implement findElement
+        int index = FFGTE(treeRoot, key);
+	    TFNode current = treeRoot;
+
+	    /*while(index == current.numItems || current.getItem(index) != key) {
+		    new node child = current.getChild(index);
+		    if (child == null) {
+			    break;
+		    } else {
+			    current = child;
+			    index = current.FFGTE();
+		    }	
+	}*/
+
         return null;
     }
 
