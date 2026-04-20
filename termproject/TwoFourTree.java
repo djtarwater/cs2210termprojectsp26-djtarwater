@@ -46,13 +46,16 @@ public class TwoFourTree
 
     //What child is this function
     private int WCIT(TFNode node) {
-        /*TFNode parent = node.getParent();
+        TFNode parent = node.getParent();
         if (parent == null) {
             return -1;
         }
-        else 
-        */
-        return 0;
+        for (int i = 0; i < parent.getNumItems(); i++) {
+            if (parent.getChild(i) == node) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 
