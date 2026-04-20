@@ -80,7 +80,7 @@ public class TwoFourTree
 		    }	
 	    }
 
-        return null;
+        return current;
     }
 
     /**
