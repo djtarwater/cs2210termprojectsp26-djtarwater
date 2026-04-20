@@ -37,7 +37,7 @@ public class TwoFourTree
 
     private int FFGTE(TFNode node, Object key){
         for (int i = 0; i < node.getNumItems(); i++){
-            if (treeComp.isGreaterThan(node.getItem(i), key)) {
+            if (treeComp.isGreaterThan(node.getItem(i).element(), key)) {
                 return i;
             }
         }
@@ -70,7 +70,7 @@ public class TwoFourTree
         int index = FFGTE(treeRoot, key);
 	    TFNode current = treeRoot;
 
-	    while(index == current.getNumItems() || current.getItem(index) != key) {
+	    while(index == current.getNumItems() || current.getItem(index).element() != key) {
 		    TFNode child = current.getChild(index);
 		    if (child == null) {
 			    break;
@@ -80,7 +80,10 @@ public class TwoFourTree
 		    }	
 	    }
 
-        return current.getItem(index);
+        if (current.getItem(index).element() == key){
+            return current.getItem(index);
+        }
+        return null;
     }
 
     /**
@@ -90,6 +93,7 @@ public class TwoFourTree
      */
     public void insertElement(Object key, Object element) {
         //TODO: implement insertElement
+
     }
 
     /**
