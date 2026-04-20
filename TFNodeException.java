@@ -5,7 +5,7 @@ package termproject;
  * Description:
  * Copyright:    Copyright (c) 2001
  * Company:
- * @author
+ * @author      David Tarwater and Jadon Spears
  * @version 1.0
  */
 
