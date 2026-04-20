@@ -40,7 +40,7 @@ public class TwoFourTree
             if (treeComp.isGreaterThan(node.getItem(i), key)){
                 return i;
             }
-        }
+        }//
         return node.getNumItems();
     }
 
