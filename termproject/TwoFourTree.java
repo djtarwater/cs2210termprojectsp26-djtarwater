@@ -80,7 +80,7 @@ public class TwoFourTree
 		    }	
 	    }
 
-        return current;
+        return current.getItem(index);
     }
 
     /**
