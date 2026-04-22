@@ -93,7 +93,7 @@ public class TwoFourTree
      */
     public void insertElement(Object key, Object element) {
         //TODO: implement insertElement
- TFNode current = treeRoot;
+    TFNode current = treeRoot;
 
     // Handle empty tree
     if (treeRoot == null) {
@@ -114,8 +114,51 @@ public class TwoFourTree
     current.insertItem(index, new Item(key, element));
     size++;
 
-    // Now handle overflow...
+    // Now handle overflow
+    while (current.getNumItems() > 3) {
+        TFNode parent = current.getParent();
+        splitNode(current);
+        current = parent;
+        if (current == null) break;
     }
+} 
+
+private void splitNode(TFNode node) {
+    TFNode parent = node.getParent();
+
+    Item middleItem = (Item) node.getItem(2);
+
+    TFNode rightNode = new TFNode();
+    rightNode.addItem(0, node.getItem(3));
+
+    rightNode.setChild(0, node.getChild(3));
+    rightNode.setChild(1, node.getChild(4));
+
+    if (rightNode.getChild(0) != null) {
+        rightNode.getChild(0).setParent(rightNode);
+        rightNode.getChild(1).setParent(rightNode);
+    }
+
+    node.removeItem(3);
+    node.removeItem(2);
+    node.setChild(3, null);
+    node.setChild(4, null);
+
+    if (parent == null) {
+        TFNode newRoot = new TFNode();
+        newRoot.addItem(0, middleItem);
+        newRoot.setChild(0, node);
+        newRoot.setChild(1, rightNode);
+        node.setParent(newRoot);
+        rightNode.setParent(newRoot);
+        setRoot(newRoot);
+    } else {
+        int parentIndex = WCIT(node);
+        parent.insertItem(parentIndex, middleItem);
+        parent.setChild(parentIndex + 1, rightNode);
+        rightNode.setParent(parent);
+    }
+}
 
     /**
      * Searches dictionary to determine if key is present, then
