@@ -35,28 +35,29 @@ public class TwoFourTree
         return (size == 0);
     }
 
-    private int FFGTE(TFNode node, Object key){
-        for (int i = 0; i < node.getNumItems(); i++){
-            if (treeComp.isGreaterThan(node.getItem(i).element(), key)) {
-                return i;
-            }
+private int FFGTE(TFNode node, Object key) {
+    for (int i = 0; i < node.getNumItems(); i++) {
+        if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).element(), key)) {
+            return i;
         }
-        return node.getNumItems();
     }
+    return node.getNumItems();
+}
 
     //What child is this function
-    private int WCIT(TFNode node) {
-        TFNode parent = node.getParent();
-        if (parent == null) {
-            return -1;
-        }
-        for (int i = 0; i < parent.getNumItems(); i++) {
-            if (parent.getChild(i) == node) {
-                return i;
-            }
-        }
+private int WCIT(TFNode node) {
+    TFNode parent = node.getParent();
+    if (parent == null) {
         return -1;
     }
+    // Loop should go up to getNumItems() INCLUSIVE
+    for (int i = 0; i <= parent.getNumItems(); i++) {
+        if (parent.getChild(i) == node) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 
 
@@ -68,17 +69,17 @@ public class TwoFourTree
     public Object findElement(Object key) {
         //TODO: implement findElement
         int index = FFGTE(treeRoot, key);
-	    TFNode current = treeRoot;
+        TFNode current = treeRoot;
 
-	    while(index == current.getNumItems() || current.getItem(index).element() != key) {
-		    TFNode child = current.getChild(index);
-		    if (child == null) {
-			    break;
-		    } else {
-			    current = child;
-			    index = FFGTE(current, key);
-		    }	
-	    }
+        while(index == current.getNumItems() || current.getItem(index).element() != key) {
+            TFNode child = current.getChild(index);
+            if (child == null) {
+                break;
+            } else {
+                current = child;
+                index = FFGTE(current, key);
+            }
+        }
 
         if (current.getItem(index).element() == key){
             return current.getItem(index);
@@ -93,35 +94,35 @@ public class TwoFourTree
      */
     public void insertElement(Object key, Object element) {
         //TODO: implement insertElement
-    TFNode current = treeRoot;
+        TFNode current = treeRoot;
 
-    // Handle empty tree
-    if (treeRoot == null) {
-        treeRoot = new TFNode();
-        treeRoot.addItem(0, new Item(key, element));
+        // Handle empty tree
+        if (treeRoot == null) {
+            treeRoot = new TFNode();
+            treeRoot.addItem(0, new Item(key, element));
+            size++;
+            return;
+        }
+
+        // Walk down to a leaf
+        int index = FFGTE(current, key);
+        while (current.getChild(index) != null) {
+            current = current.getChild(index);
+            index = FFGTE(current, key);
+        }
+
+        // Insert into the leaf at the correct position
+        current.insertItem(index, new Item(key, element));
         size++;
-        return;
-    }
 
-    // Walk down to a leaf
-    int index = FFGTE(current, key);
-    while (current.getChild(index) != null) {
-        current = current.getChild(index);
-        index = FFGTE(current, key);
+        // Now handle overflow
+        while (current.getNumItems() > 3) {
+            TFNode parent = current.getParent();
+            splitNode(current);
+            current = parent;
+            if (current == null) break;
+        }
     }
-
-    // Insert into the leaf at the correct position
-    current.insertItem(index, new Item(key, element));
-    size++;
-
-    // Now handle overflow
-    while (current.getNumItems() > 3) {
-        TFNode parent = current.getParent();
-        splitNode(current);
-        current = parent;
-        if (current == null) break;
-    }
-} 
 
 private void splitNode(TFNode node) {
     TFNode parent = node.getParent();
