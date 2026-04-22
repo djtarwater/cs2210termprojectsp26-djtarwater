@@ -93,7 +93,28 @@ public class TwoFourTree
      */
     public void insertElement(Object key, Object element) {
         //TODO: implement insertElement
+ TFNode current = treeRoot;
 
+    // Handle empty tree
+    if (treeRoot == null) {
+        treeRoot = new TFNode();
+        treeRoot.addItem(0, new Item(key, element));
+        size++;
+        return;
+    }
+
+    // Walk down to a leaf
+    int index = FFGTE(current, key);
+    while (current.getChild(index) != null) {
+        current = current.getChild(index);
+        index = FFGTE(current, key);
+    }
+
+    // Insert into the leaf at the correct position
+    current.insertItem(index, new Item(key, element));
+    size++;
+
+    // Now handle overflow...
     }
 
     /**
