@@ -156,8 +156,10 @@ private void splitNode(TFNode node) {
     } else {
         int parentIndex = WCIT(node);
         parent.insertItem(parentIndex, middleItem);
+        parent.setChild(parentIndex, node);
         parent.setChild(parentIndex + 1, rightNode);
         rightNode.setParent(parent);
+        node.setParent(parent);
     }
 }
 
