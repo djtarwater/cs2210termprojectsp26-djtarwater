@@ -93,7 +93,6 @@ private int WCIT(TFNode node) {
      * @param element to be inserted
      */
     public void insertElement(Object key, Object element) {
-        //TODO: implement insertElement
         TFNode current = treeRoot;
 
         // Handle empty tree
@@ -139,9 +138,9 @@ private void splitNode(TFNode node) {
         rightNode.getChild(0).setParent(rightNode);
         rightNode.getChild(1).setParent(rightNode);
     }
-
-    node.removeItem(3);
-    node.removeItem(2);
+    //Clean up the original node
+    node.deleteItem(3);
+    node.deleteItem(2);
     node.setChild(3, null);
     node.setChild(4, null);
 
@@ -158,8 +157,8 @@ private void splitNode(TFNode node) {
         parent.insertItem(parentIndex, middleItem);
         parent.setChild(parentIndex, node);
         parent.setChild(parentIndex + 1, rightNode);
-        rightNode.setParent(parent);
         node.setParent(parent);
+        rightNode.setParent(parent);
     }
 }
 
