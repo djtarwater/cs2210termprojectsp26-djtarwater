@@ -35,6 +35,15 @@ public class TwoFourTree
         return (size == 0);
     }
 
+private Boolean isInternal(TFNode node) {
+    for (int i = 0; i < 5; i++) {
+        if (node.getChild(i) != null) {
+            return true;
+        }
+    }
+    return false;
+}
+
 private int FFGTE(TFNode node, Object key) {
     for (int i = 0; i < node.getNumItems(); i++) {
         if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).element(), key)) {
@@ -108,6 +117,14 @@ private int WCIT(TFNode node) {
         while (current.getChild(index) != null) {
             current = current.getChild(index);
             index = FFGTE(current, key);
+        }
+
+        if (current.getItem(index) == key) {
+            current = current.getChild(index);
+
+            while (this.isInternal(current)) {
+                current = current.getChild(0);
+            }
         }
 
         // Insert into the leaf at the correct position
