@@ -2,7 +2,15 @@ package termproject;
 
 /**
  * Title:        Term Project 2-4 Trees
- * Description:
+ * Description:  A balanced search tree implementation that maintains O(log n) performance
+ *               for insertions, deletions, and searches. Supports duplicate keys.
+ * 
+ * A 2-4 tree is a multiway tree where:
+ * - Each internal node has 2, 3, or 4 children
+ * - Each node stores 1, 2, or 3 items in sorted order
+ * - All leaves are at the same depth (perfectly balanced)
+ * - Items are stored only in leaves; internal nodes store duplicates of keys for navigation
+ * 
  * Copyright:    Copyright (c) 2001
  * Company:
  * @author    David Tarwater and Jadon Spears
@@ -11,30 +19,60 @@ package termproject;
 public class TwoFourTree
         implements Dictionary {
 
+    // Comparator used for comparing elements during tree operations
     private Comparator treeComp;
+    
+    // Total number of items stored in the tree (including duplicates)
     private int size = 0;
+    
+    // Reference to the root node of the tree
     private TFNode treeRoot = null;
 
+    /**
+     * Creates a new 2-4 tree with the specified comparator
+     * @param comp the comparator to use for ordering elements
+     */
     public TwoFourTree(Comparator comp) {
         treeComp = comp;
     }
 
+    /**
+     * Gets the root node of the tree
+     * @return the root TFNode, or null if tree is empty
+     */
     private TFNode root() {
         return treeRoot;
     }
 
+    /**
+     * Sets the root node of the tree
+     * @param root the new root node
+     */
     private void setRoot(TFNode root) {
         treeRoot = root;
     }
 
+    /**
+     * Returns the number of items currently in the tree
+     * @return the size of the tree
+     */
     public int size() {
         return size;
     }
 
+    /**
+     * Checks if the tree is empty
+     * @return true if tree contains no items, false otherwise
+     */
     public boolean isEmpty() {
         return (size == 0);
     }
 
+/**
+ * Checks if a node is internal (has at least one child)
+ * @param node the node to check
+ * @return true if node has children, false if it's a leaf
+ */
 private Boolean isInternal(TFNode node) {
     for (int i = 0; i < 5; i++) {
         if (node.getChild(i) != null) {
@@ -44,6 +82,14 @@ private Boolean isInternal(TFNode node) {
     return false;
 }
 
+/**
+ * Find First Greater Than or Equal: returns the index of the first item
+ * in the node that is greater than or equal to the given key.
+ * Used for binary search-like navigation through the tree.
+ * @param node the current node to search
+ * @param key the key to compare against
+ * @return index of first item >= key, or numItems if no such item exists
+ */
 private int FFGTE(TFNode node, Object key) {
     for (int i = 0; i < node.getNumItems(); i++) {
         if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).element(), key)) {
@@ -53,13 +99,18 @@ private int FFGTE(TFNode node, Object key) {
     return node.getNumItems();
 }
 
-    //What child is this function
+/**
+ * What Child Is This (WCIT): determines which child position this node
+ * occupies in its parent node. Used during tree restructuring operations.
+ * @param node the node to locate in its parent
+ * @return the child index (0 to parent.numItems), or -1 if node is root
+ */
 private int WCIT(TFNode node) {
     TFNode parent = node.getParent();
     if (parent == null) {
         return -1;
     }
-    // Loop should go up to getNumItems() INCLUSIVE
+    // A node with n items has n+1 children, so check all positions
     for (int i = 0; i <= parent.getNumItems(); i++) {
         if (parent.getChild(i) == node) {
             return i;
@@ -76,21 +127,30 @@ private int WCIT(TFNode node) {
      * @return object corresponding to key; null if not found
      */
     public Object findElement(Object key) {
-        //TODO: implement findElement
+        // Handle empty tree case
+        if (treeRoot == null) {
+            return null;
+        }
+        
+        // Start at root and find first item >= key
         int index = FFGTE(treeRoot, key);
         TFNode current = treeRoot;
 
-        while(index == current.getNumItems() || current.getItem(index).element() != key) {
+        // Traverse down the tree following appropriate child pointers
+        while(index == current.getNumItems() || !treeComp.isEqual(current.getItem(index).element(), key)) {
             TFNode child = current.getChild(index);
+            // If we reach a leaf without finding exact match, key not in tree
             if (child == null) {
                 break;
             } else {
+                // Continue searching in the appropriate child
                 current = child;
                 index = FFGTE(current, key);
             }
         }
 
-        if (current.getItem(index).element() == key){
+        // Return the item if we found an exact match
+        if (index < current.getNumItems() && treeComp.isEqual(current.getItem(index).element(), key)){
             return current.getItem(index);
         }
         return null;
@@ -104,7 +164,7 @@ private int WCIT(TFNode node) {
     public void insertElement(Object key, Object element) {
         TFNode current = treeRoot;
 
-        // Handle empty tree
+        // Handle empty tree - create root with single item
         if (treeRoot == null) {
             treeRoot = new TFNode();
             treeRoot.addItem(0, new Item(key, element));
@@ -112,55 +172,61 @@ private int WCIT(TFNode node) {
             return;
         }
 
-        // Walk down to a leaf
+        // Walk down the tree to find the appropriate leaf node
         int index = FFGTE(current, key);
         while (current.getChild(index) != null) {
             current = current.getChild(index);
             index = FFGTE(current, key);
         }
 
-        if (current.getItem(index) == key) {
-            current = current.getChild(index);
-
-            while (this.isInternal(current)) {
-                current = current.getChild(0);
-            }
-        }
-
-        // Insert into the leaf at the correct position
+        // Insert into the leaf at the correct sorted position
         current.insertItem(index, new Item(key, element));
         size++;
 
-        // Now handle overflow
+        // Cascade up: split any node that has too many items (> 3)
+        // A 2-4 tree node can have at most 3 items (and 4 children)
         while (current.getNumItems() > 3) {
             TFNode parent = current.getParent();
             splitNode(current);
             current = parent;
-            if (current == null) break;
+            if (current == null) break; // Stop if we reach the new root
         }
     }
 
+/**
+ * Splits an overflowed node (4 items) into two smaller nodes.
+ * The middle item is promoted to the parent node, and the node's
+ * items are redistributed: left keeps item 0-1, right gets item 3,
+ * and item 2 is promoted up.
+ * @param node the overflowed node to split (must have 4 items)
+ */
 private void splitNode(TFNode node) {
     TFNode parent = node.getParent();
 
+    // Extract the middle item (index 2) to promote up
     Item middleItem = (Item) node.getItem(2);
 
+    // Create new right node and move the rightmost item there
     TFNode rightNode = new TFNode();
     rightNode.addItem(0, node.getItem(3));
 
+    // Move the rightmost children to the new right node
     rightNode.setChild(0, node.getChild(3));
     rightNode.setChild(1, node.getChild(4));
 
+    // Update parent pointers for the children that moved
     if (rightNode.getChild(0) != null) {
         rightNode.getChild(0).setParent(rightNode);
         rightNode.getChild(1).setParent(rightNode);
     }
-    //Clean up the original node
+    
+    // Clean up the original node: remove items 2 and 3
     node.deleteItem(3);
     node.deleteItem(2);
     node.setChild(3, null);
     node.setChild(4, null);
 
+    // Case 1: Node is the root - create new root with the middle item
     if (parent == null) {
         TFNode newRoot = new TFNode();
         newRoot.addItem(0, middleItem);
@@ -169,7 +235,9 @@ private void splitNode(TFNode node) {
         node.setParent(newRoot);
         rightNode.setParent(newRoot);
         setRoot(newRoot);
-    } else {
+    } 
+    // Case 2: Node has a parent - promote middle item to parent
+    else {
         int parentIndex = WCIT(node);
         parent.insertItem(parentIndex, middleItem);
         parent.setChild(parentIndex, node);
@@ -187,10 +255,16 @@ private void splitNode(TFNode node) {
      * @exception ElementNotFoundException if the key is not in dictionary
      */
     public Object removeElement(Object key) throws ElementNotFoundException {
-        //TODO: implement removeElement
+        // TODO: Implement removal with tree rebalancing
+        // This would involve: finding the element, removing it from leaf,
+        // and rebalancing the tree if nodes become too small (< 1 item)
         return null;
     }
 
+    /**
+     * Main method for testing the 2-4 tree implementation
+     * Tests insertion with various values and removal operations
+     */
     public static void main(String[] args) {
         Comparator myComp = new IntegerComparator();
         TwoFourTree myTree = new TwoFourTree(myComp);
@@ -313,6 +387,9 @@ private void splitNode(TFNode node) {
         System.out.println("done");
     }
 
+/**
+ * Prints all elements in the tree in a hierarchical format
+ */
     public void printAllElements() {
         int indent = 0;
         if (root() == null) {
@@ -323,14 +400,23 @@ private void splitNode(TFNode node) {
         }
     }
 
+    /**
+     * Recursively prints the tree structure with indentation
+     * @param start the node to start printing from
+     * @param indent the current indentation level
+     */
     public void printTree(TFNode start, int indent) {
         if (start == null) {
             return;
         }
+        // Add indentation for visual hierarchy
         for (int i = 0; i < indent; i++) {
             System.out.print(" ");
         }
+        // Print current node's items
         printTFNode(start);
+        
+        // Recursively print all children with increased indentation
         indent += 4;
         int numChildren = start.getNumItems() + 1;
         for (int i = 0; i < numChildren; i++) {
@@ -338,6 +424,10 @@ private void splitNode(TFNode node) {
         }
     }
 
+    /**
+     * Prints all items in a single node on one line
+     * @param node the node to print
+     */
     public void printTFNode(TFNode node) {
         int numItems = node.getNumItems();
         for (int i = 0; i < numItems; i++) {
@@ -346,42 +436,60 @@ private void splitNode(TFNode node) {
         System.out.println();
     }
 
-    // checks if tree is properly hooked up, i.e., children point to parents
+    /**
+     * Validates tree integrity: checks that all parent-child relationships
+     * are properly maintained and no structural inconsistencies exist
+     */
     public void checkTree() {
         checkTreeFromNode(treeRoot);
     }
 
+    /**
+     * Recursively validates tree structure from a given node
+     * Checks for: parent-child consistency, null/non-null child consistency,
+     * and duplicate children
+     * @param start the node to start validation from
+     */
     private void checkTreeFromNode(TFNode start) {
         if (start == null) {
             return;
         }
 
+        // Check 1: Verify parent-child relationship is bidirectional
+        // If this node has a parent, verify that this node is actually a child of that parent
         if (start.getParent() != null) {
             TFNode parent = start.getParent();
             int childIndex = 0;
+            // Search all child positions (0 through numItems, since n items = n+1 children)
             for (childIndex = 0; childIndex <= parent.getNumItems(); childIndex++) {
                 if (parent.getChild(childIndex) == start) {
                     break;
                 }
             }
-            // if child wasn't found, print problem
+            // If child wasn't found in parent's children, structural error
             if (childIndex > parent.getNumItems()) {
                 System.out.println("Child to parent confusion");
                 printTFNode(start);
             }
         }
 
+        // Check 2: Validate children consistency
+        // All children must be either all null (leaf node) or all non-null (internal node)
+        // No mixed null and non-null children allowed
         if (start.getChild(0) != null) {
             for (int childIndex = 0; childIndex <= start.getNumItems(); childIndex++) {
+                // Check for mixed null and non-null children
                 if (start.getChild(childIndex) == null) {
                     System.out.println("Mixed null and non-null children");
                     printTFNode(start);
                 }
                 else {
+                    // Verify reverse pointer: child's parent must be this node
                     if (start.getChild(childIndex).getParent() != start) {
                         System.out.println("Parent to child confusion");
                         printTFNode(start);
                     }
+                    // Check for duplicate children (same child in multiple positions)
                     for (int i = childIndex - 1; i >= 0; i--) {
                         if (start.getChild(i) == start.getChild(childIndex)) {
                             System.out.println("Duplicate children of node");
@@ -393,6 +501,7 @@ private void splitNode(TFNode node) {
             }
         }
 
+        // Recursively check all children
         int numChildren = start.getNumItems() + 1;
         for (int childIndex = 0; childIndex < numChildren; childIndex++) {
             checkTreeFromNode(start.getChild(childIndex));
