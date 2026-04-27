@@ -302,7 +302,7 @@ private void splitNode(TFNode node) {
 
                 if (index > 0 && parent.getChild(index - 1) != null && parent.getChild(index - 1).getNumItems() > 1) {
                     //leftTransfer
-                    parent.getChild(index - 1)
+                    current.insertItem(0, parent.getChild(index - 1).removeItem(parent.getChild(index - 1).getNumItems()));
                 } else if (index < 3 && parent.getChild(index + 1) != null && parent.getChild(index + 1).getNumItems() > 1) {
                     //righttransfer
                 } else if (index > 0 && parent.getChild(index - 1) != null) {
