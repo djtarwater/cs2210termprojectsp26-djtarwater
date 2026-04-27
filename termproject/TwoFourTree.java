@@ -184,7 +184,6 @@ private int WCIT(TFNode node) {
         size++;
 
         // Cascade up: split any node that has too many items (> 3)
-        // A 2-4 tree node can have at most 3 items (and 4 children)
         while (current.getNumItems() > 3) {
             TFNode parent = current.getParent();
             splitNode(current);
