@@ -309,6 +309,7 @@ private void splitNode(TFNode node) {
         if(size == 0){
             throw new ElementNotFoundException("Error: The element was not found in the tree");
         }
+        Item element = null;
 
         TFNode current = treeRoot;
         int index = FFGTE(current, key);
@@ -319,6 +320,9 @@ private void splitNode(TFNode node) {
                 break;
             }
         }
+        //if (current.getItem(index).key() == key) {
+            element = current.getItem(index);
+        //}
 
         if (this.isInternal(current)) {
             TFNode inorderSuccessor = current;
@@ -345,9 +349,11 @@ private void splitNode(TFNode node) {
         //underflow
         fixUnderflow(current);
         
+        if (element == null) {
+            System.out.println();
+        }
 
-
-        return null;
+        return element;
     }
 
     /**
@@ -359,6 +365,7 @@ private void splitNode(TFNode node) {
         TwoFourTree myTree = new TwoFourTree(myComp);
 
         Integer myInt1 = new Integer(47);
+        /*
         myTree.insertElement(myInt1, myInt1);
         myTree.printAllElements();
         myTree.checkTree();
@@ -452,7 +459,7 @@ private void splitNode(TFNode node) {
         myTree.checkTree();
 
         myTree.printAllElements();
-        System.out.println("done");
+        System.out.println("done");*/
 
         myTree = new TwoFourTree(myComp);
         final int TEST_SIZE = 10000;
@@ -460,9 +467,10 @@ private void splitNode(TFNode node) {
 
         for (int i = 0; i < TEST_SIZE; i++) {
             myTree.insertElement(new Integer(i), new Integer(i));
-            // myTree.printAllElements();
-            // myTree.checkTree();
+            //myTree.printAllElements();
+            myTree.checkTree();
         }
+        //myTree.printAllElements();
         System.out.println("removing");
         for (int i = 0; i < TEST_SIZE; i++) {
             int out = (Integer) myTree.removeElement(new Integer(i));
@@ -470,8 +478,9 @@ private void splitNode(TFNode node) {
                 throw new TwoFourTreeException("main: wrong element removed");
             }
             if (i > TEST_SIZE - 15) {
-                myTree.printAllElements();
+                //myTree.printAllElements();
             }
+            myTree.checkTree();
         }
         System.out.println("done");
     }
