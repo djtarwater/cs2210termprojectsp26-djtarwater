@@ -92,7 +92,7 @@ private Boolean isInternal(TFNode node) {
  */
 private int FFGTE(TFNode node, Object key) {
     for (int i = 0; i < node.getNumItems(); i++) {
-        if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).element(), key)) {
+        if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).key(), key)) {
             return i;
         }
     }
@@ -284,7 +284,7 @@ private void splitNode(TFNode node) {
                 else if (index > 0 && parent.getChild(index - 1) != null) {
                     //leftfusion
                     TFNode temp = parent.getChild(index - 1);
-                    temp.addItem(temp.getNumItems() + 1, parent.removeItem(index - 1));
+                    temp.insertItem(temp.getNumItems(), parent.removeItem(index - 1));
                     parent.setChild(0, temp);
                     this.fixUnderflow(parent);
                 } 
@@ -292,7 +292,7 @@ private void splitNode(TFNode node) {
                     //rightfusion
                     TFNode temp = parent.getChild(index + 1);
                     if (temp != null) {
-                        temp.addItem(0, parent.removeItem(index));
+                        temp.insertItem(0, parent.removeItem(index));
                     }
                     this.fixUnderflow(parent);
                 }
@@ -314,7 +314,7 @@ private void splitNode(TFNode node) {
         while (current.getChild(index) != null) {
             current = current.getChild(index);
             index = FFGTE(current, key);
-            if (current.getItem(index) != null && current.getItem(index).key() == key) {
+            if (current.getItem(index) != null && treeComp.isEqual(current.getItem(index).key(), key)) {
                 break;
             }
         }
