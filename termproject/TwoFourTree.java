@@ -302,7 +302,6 @@ private void splitNode(TFNode node) {
     }
 
     public Object removeElement(Object key) throws ElementNotFoundException {
-        // TODO: Implement removal with tree rebalancing
         // This would involve: finding the element, removing it from leaf,
         // and rebalancing the tree if nodes become too small (< 1 item)
         if(size == 0){
@@ -472,7 +471,7 @@ private void splitNode(TFNode node) {
         //myTree.printAllElements();
         System.out.println("removing");
         for (int i = 0; i < TEST_SIZE; i++) {
-            int out = (Integer) myTree.removeElement(new Integer(i));
+            int out = (Integer) ((Item) myTree.removeElement(new Integer(i))).element();
             if (out != i) {
                 throw new TwoFourTreeException("main: wrong element removed");
             }
