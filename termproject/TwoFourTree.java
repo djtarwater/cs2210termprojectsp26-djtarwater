@@ -92,7 +92,7 @@ private Boolean isInternal(TFNode node) {
  */
 private int FFGTE(TFNode node, Object key) {
     for (int i = 0; i < node.getNumItems(); i++) {
-        if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).element(), key)) {
+        if (treeComp.isGreaterThanOrEqualTo(node.getItem(i).key(), key)) {
             return i;
         }
     }
@@ -314,7 +314,7 @@ private void splitNode(TFNode node) {
         while (current.getChild(index) != null) {
             current = current.getChild(index);
             index = FFGTE(current, key);
-            if (current.getItem(index) != null && current.getItem(index).key() == key) {
+            if (current.getItem(index) != null && treeComp.isEqual(current.getItem(index).key(), key)) {
                 break;
             }
         }
