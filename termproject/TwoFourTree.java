@@ -254,6 +254,54 @@ private void splitNode(TFNode node) {
      * @return object corresponding to key
      * @exception ElementNotFoundException if the key is not in dictionary
      */
+
+    private void fixUnderflow(TFNode current) { 
+        if (current.getNumItems() == 0) {
+            TFNode parent = current.getParent();
+            if (parent != null) {
+                int index = this.WCIT(current);
+
+                if (index > 0 && parent.getChild(index - 1) != null && parent.getChild(index - 1).getNumItems() > 1) {
+                    //leftTransfer
+                    TFNode leftSibling = parent.getChild(index - 1);
+                    current.setChild(1, current.getChild(0));
+                    current.setChild(0, leftSibling.getChild(leftSibling.getNumItems() + 1));
+                    if (leftSibling.getChild(leftSibling.getNumItems() + 1) != null) {
+                        leftSibling.getChild(leftSibling.getNumItems() + 1).setParent(current);
+                    }
+                    leftSibling.setChild(leftSibling.getNumItems() + 1, null);
+                    current.insertItem(0, leftSibling.removeItem(leftSibling.getNumItems()));
+                } 
+                else if (index < 3 && parent.getChild(index + 1) != null && parent.getChild(index + 1).getNumItems() > 1) {
+                    //righttransfer
+                    TFNode rightSibling = parent.getChild(index + 1);
+                    current.setChild(1, rightSibling.getChild(0));
+                    if (rightSibling.getChild(0) != null) {
+                        rightSibling.getChild(0).setParent(current);
+                    }
+                    rightSibling.setChild(0, null);
+                    current.insertItem(0, rightSibling.removeItem(0));
+                } 
+                else if (index > 0 && parent.getChild(index - 1) != null) {
+                    //leftfusion
+                    TFNode temp = parent.getChild(index - 1);
+                    temp.addItem(temp.getNumItems() + 1, parent.removeItem(index - 1));
+                    parent.setChild(0, temp);
+                    this.fixUnderflow(parent);
+                } 
+                else {
+                    //rightfusion
+                    TFNode temp = parent.getChild(index + 1);
+                    if (temp != null) {
+                        temp.addItem(0, parent.removeItem(index));
+                    }
+                    this.fixUnderflow(parent);
+                }
+
+            }
+        }
+    }
+
     public Object removeElement(Object key) throws ElementNotFoundException {
         // TODO: Implement removal with tree rebalancing
         // This would involve: finding the element, removing it from leaf,
@@ -295,24 +343,8 @@ private void splitNode(TFNode node) {
         size--;
         
         //underflow
-        if (current.getNumItems() == 0) {
-            TFNode parent = current.getParent();
-            if (parent != null) {
-                index = this.WCIT(current);
-
-                if (index > 0 && parent.getChild(index - 1) != null && parent.getChild(index - 1).getNumItems() > 1) {
-                    //leftTransfer
-                    current.insertItem(0, parent.getChild(index - 1).removeItem(parent.getChild(index - 1).getNumItems()));
-                } else if (index < 3 && parent.getChild(index + 1) != null && parent.getChild(index + 1).getNumItems() > 1) {
-                    //righttransfer
-                } else if (index > 0 && parent.getChild(index - 1) != null) {
-                    //leftfusion
-                } else {
-                    //rightfusion
-                }
-
-            }
-        }
+        fixUnderflow(current);
+        
 
 
         return null;
