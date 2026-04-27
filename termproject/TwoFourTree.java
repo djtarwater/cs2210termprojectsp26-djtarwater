@@ -284,7 +284,7 @@ private void splitNode(TFNode node) {
                 else if (index > 0 && parent.getChild(index - 1) != null) {
                     //leftfusion
                     TFNode temp = parent.getChild(index - 1);
-                    temp.addItem(temp.getNumItems() + 1, parent.removeItem(index - 1));
+                    temp.insertItem(temp.getNumItems(), parent.removeItem(index - 1));
                     parent.setChild(0, temp);
                     this.fixUnderflow(parent);
                 } 
@@ -292,7 +292,7 @@ private void splitNode(TFNode node) {
                     //rightfusion
                     TFNode temp = parent.getChild(index + 1);
                     if (temp != null) {
-                        temp.addItem(0, parent.removeItem(index));
+                        temp.insertItem(0, parent.removeItem(index));
                     }
                     this.fixUnderflow(parent);
                 }
