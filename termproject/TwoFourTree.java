@@ -321,6 +321,9 @@ private void splitNode(TFNode node) {
         //if (current.getItem(index).key() == key) {
             element = current.getItem(index);
         //}
+        if (treeComp.isEqual(key, 2)) {
+            System.out.println();
+        }
 
         if (this.isInternal(current)) {
             TFNode inorderSuccessor = current;
