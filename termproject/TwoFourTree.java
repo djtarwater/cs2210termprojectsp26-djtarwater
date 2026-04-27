@@ -258,6 +258,63 @@ private void splitNode(TFNode node) {
         // TODO: Implement removal with tree rebalancing
         // This would involve: finding the element, removing it from leaf,
         // and rebalancing the tree if nodes become too small (< 1 item)
+        if(size == 0){
+            throw new ElementNotFoundException("Error: The element was not found in the tree");
+        }
+
+        TFNode current = treeRoot;
+        int index = FFGTE(current, key);
+        while (current.getChild(index) != null) {
+            current = current.getChild(index);
+            index = FFGTE(current, key);
+            if (current.getItem(index) != null && current.getItem(index).key() == key) {
+                break;
+            }
+        }
+
+        if (this.isInternal(current)) {
+            TFNode inorderSuccessor = current;
+            Item inorderSuccessorItem;
+
+            if (current.getChild(index + 1) != null) {
+                inorderSuccessor = current.getChild(index + 1);
+                while (inorderSuccessor.getChild(0) != null) {
+                    inorderSuccessor = inorderSuccessor.getChild(0);
+                }
+                inorderSuccessorItem = inorderSuccessor.getItem(0);
+                current.replaceItem(index, inorderSuccessorItem);
+                inorderSuccessor.removeItem(0);
+                current = inorderSuccessor;
+            } else {
+                current.removeItem(index);
+            }
+        }
+        else {
+            current.removeItem(index);
+        }
+        size--;
+        
+        //underflow
+        if (current.getNumItems() == 0) {
+            TFNode parent = current.getParent();
+            if (parent != null) {
+                index = this.WCIT(current);
+
+                if (index > 0 && parent.getChild(index - 1) != null && parent.getChild(index - 1).getNumItems() > 1) {
+                    //leftTransfer
+                    parent.getChild(index - 1)
+                } else if (index < 3 && parent.getChild(index + 1) != null && parent.getChild(index + 1).getNumItems() > 1) {
+                    //righttransfer
+                } else if (index > 0 && parent.getChild(index - 1) != null) {
+                    //leftfusion
+                } else {
+                    //rightfusion
+                }
+
+            }
+        }
+
+
         return null;
     }
 
