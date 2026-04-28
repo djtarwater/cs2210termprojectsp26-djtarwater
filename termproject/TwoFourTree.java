@@ -137,7 +137,7 @@ private int WCIT(TFNode node) {
         TFNode current = treeRoot;
 
         // Traverse down the tree following appropriate child pointers
-        while(index == current.getNumItems() || !treeComp.isEqual(current.getItem(index).element(), key)) {
+        while(index == current.getNumItems() || !treeComp.isEqual(current.getItem(index).key(), key)) {
             TFNode child = current.getChild(index);
             // If we reach a leaf without finding exact match, key not in tree
             if (child == null) {
@@ -150,7 +150,7 @@ private int WCIT(TFNode node) {
         }
 
         // Return the item if we found an exact match
-        if (index < current.getNumItems() && treeComp.isEqual(current.getItem(index).element(), key)){
+        if (index < current.getNumItems() && treeComp.isEqual(current.getItem(index).key(), key)){
             return current.getItem(index);
         }
         return null;
@@ -175,6 +175,9 @@ private int WCIT(TFNode node) {
         // Walk down the tree to find the appropriate leaf node
         int index = FFGTE(current, key);
         while (current.getChild(index) != null) {
+            if (index < current.getNumItems() && treeComp.isEqual(current.getItem(index).key(), key)) {
+                index += 1;
+            }
             current = current.getChild(index);
             index = FFGTE(current, key);
         }
@@ -259,46 +262,69 @@ private void splitNode(TFNode node) {
             TFNode parent = current.getParent();
             if (parent != null) {
                 int index = this.WCIT(current);
+                TFNode leftSibling = null;
+                if (index > 0) {
+                    leftSibling = parent.getChild(index - 1);
+                }
+                TFNode rightSibling = null;
+                if (index < parent.getNumItems()) {
+                    rightSibling = parent.getChild(index + 1);
+                }
 
-                if (index > 0 && parent.getChild(index - 1) != null && parent.getChild(index - 1).getNumItems() > 1) {
+                if (leftSibling != null && leftSibling.getNumItems() > 1) {
                     //leftTransfer
-                    TFNode leftSibling = parent.getChild(index - 1);
-                    current.setChild(1, current.getChild(0));
-                    current.setChild(0, leftSibling.getChild(leftSibling.getNumItems() + 1));
-                    if (leftSibling.getChild(leftSibling.getNumItems() + 1) != null) {
-                        leftSibling.getChild(leftSibling.getNumItems() + 1).setParent(current);
-                    }
+                    TFNode transferChild = leftSibling.getChild(leftSibling.getNumItems());
+                    Item transferItem = parent.replaceItem(index - 1, leftSibling.getItem(leftSibling.getNumItems() - 1));
+                    leftSibling.deleteItem(leftSibling.getNumItems() - 1);
                     leftSibling.setChild(leftSibling.getNumItems() + 1, null);
-                    current.insertItem(0, leftSibling.removeItem(leftSibling.getNumItems()));
-                } 
-                else if (index < 3 && parent.getChild(index + 1) != null && parent.getChild(index + 1).getNumItems() > 1) {
-                    //righttransfer
-                    TFNode rightSibling = parent.getChild(index + 1);
-                    current.setChild(1, rightSibling.getChild(0));
-                    if (rightSibling.getChild(0) != null) {
-                        rightSibling.getChild(0).setParent(current);
+                    current.insertItem(0, transferItem);
+                    current.setChild(0, transferChild);
+                    if (transferChild != null) {
+                        transferChild.setParent(current);
                     }
-                    rightSibling.setChild(0, null);
-                    current.insertItem(0, rightSibling.removeItem(0));
                 } 
-                else if (index > 0 && parent.getChild(index - 1) != null) {
+                else if (rightSibling != null && rightSibling.getNumItems() > 1) {
+                    //righttransfer
+                    TFNode transferChild = rightSibling.getChild(0);
+                    Item transferItem = parent.replaceItem(index, rightSibling.getItem(0));
+                    rightSibling.removeItem(0);
+                    current.insertItem(0, transferItem);
+                    current.setChild(1, transferChild);
+                    if (transferChild != null) {
+                        transferChild.setParent(current);
+                    }
+                } 
+                else if (leftSibling != null) {
                     //leftfusion
-                    TFNode temp = parent.getChild(index - 1);
-                    temp.insertItem(temp.getNumItems(), parent.removeItem(index - 1));
-                    parent.setChild(0, temp);
+                    TFNode temp = current.getChild(0);
+                    leftSibling.insertItem(leftSibling.getNumItems(), parent.removeItem(index - 1));
+                    leftSibling.setChild(leftSibling.getNumItems(), temp);
+                    if (temp != null) {
+                        temp.setParent(leftSibling);
+                    }
+                    parent.setChild(index - 1, leftSibling);
                     this.fixUnderflow(parent);
                 } 
                 else {
                     //rightfusion
-                    TFNode temp = parent.getChild(index + 1);
+                    TFNode temp = current.getChild(0);
+                    rightSibling.insertItem(0, parent.removeItem(index));
+                    rightSibling.setChild(0, temp);
                     if (temp != null) {
-                        temp.insertItem(0, parent.removeItem(index));
+                        temp.setParent(rightSibling);
                     }
                     this.fixUnderflow(parent);
                 }
 
             }
+            else {
+                if (current.getChild(0) != null) {
+                    setRoot(current.getChild(0));
+                    treeRoot.setParent(null);
+                }
+            }
         }
+        return;
     }
 
     public Object removeElement(Object key) throws ElementNotFoundException {
@@ -307,40 +333,34 @@ private void splitNode(TFNode node) {
         if(size == 0){
             throw new ElementNotFoundException("Error: The element was not found in the tree");
         }
-        Item element = null;
 
+
+       
         TFNode current = treeRoot;
-        int index = FFGTE(current, key);
-        while (current.getChild(index) != null) {
-            current = current.getChild(index);
+        int index = 0;
+        while (current != null) {
             index = FFGTE(current, key);
-            if (current.getItem(index) != null && treeComp.isEqual(current.getItem(index).key(), key)) {
+            if (index < current.getNumItems() && treeComp.isEqual(current.getItem(index).key(), key)) {
                 break;
             }
+            current = current.getChild(index);
         }
-        //if (current.getItem(index).key() == key) {
-            element = current.getItem(index);
-        //}
-        if (treeComp.isEqual(key, 2)) {
-            System.out.println();
+
+        if (current == null) {
+            throw new ElementNotFoundException("Error: The element was not found in the tree");
         }
+
+        Item element = current.getItem(index);
+
 
         if (this.isInternal(current)) {
-            TFNode inorderSuccessor = current;
-            Item inorderSuccessorItem;
+            TFNode inorderSuccessor = current.getChild(index + 1);
 
-            if (current.getChild(index + 1) != null) {
-                inorderSuccessor = current.getChild(index + 1);
-                while (inorderSuccessor.getChild(0) != null) {
-                    inorderSuccessor = inorderSuccessor.getChild(0);
-                }
-                inorderSuccessorItem = inorderSuccessor.getItem(0);
-                current.replaceItem(index, inorderSuccessorItem);
-                inorderSuccessor.removeItem(0);
-                current = inorderSuccessor;
-            } else {
-                current.removeItem(index);
+            while (inorderSuccessor.getChild(0) != null) {
+                inorderSuccessor = inorderSuccessor.getChild(0);
             }
+            current.replaceItem(index, inorderSuccessor.removeItem(0));
+            current = inorderSuccessor;
         }
         else {
             current.removeItem(index);
