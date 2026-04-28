@@ -14,6 +14,8 @@ How did you attack the problem? What choices did you make in your design, and wh
 
 > We walked through this project systematically as we walked through the slides and helpful instructions. We started out by creating our 2 helper functions, Find first Greater than and Equal To (FFGTE) and What Child Is This (WCIT). Once we had both of these functions we were able to use the FFGTE for the FindElement function. We quickly finished that up and began on the Insert Function. That one took a while, but I split it up after finding where to insert, and inserting it. When I check for overflow I call a seperate splitNode function that handles overflow and restructures the tree as needed. Once overflow was handled and we were able to insert elements without any errors (which took sometime as we messed up pointer issues at first) we worked on handling duplicates, and then eventually began on the remove function.
 
+> For the remove function, we started by finding the element and replacing it with the inorder successor if it is internal, then checking the node with one less element for underflow. We then worked on fixing the underflow in a seperate fixUnderflow() function using transfers and fusions and tested it.
+
 # Security Analysis
 State the potential security vulnerabilities of your design. How could these vulnerabilities be exploited by an adversary? What would be the impact if the vulnerability is exploited?
 
